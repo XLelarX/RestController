@@ -1,4 +1,4 @@
-package data.permissions;
+package data.categories;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import data.Response;
@@ -9,8 +9,8 @@ import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class PermissionsResponse extends Response
+public class CategoriesResponse extends Response
 {
-	@JsonProperty("permissions")
-	private List<Permissions> permissions;
+	@JsonProperty("categories")
+	private List<Categories> categories;
 }

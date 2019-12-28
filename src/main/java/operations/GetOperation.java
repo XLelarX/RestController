@@ -1,21 +1,22 @@
 package operations;
 
 import data.Data;
-import data.permissions.Permissions;
+import exceptions.FindException;
 import org.springframework.stereotype.Service;
 import repositories.DataRepository;
-import repositories.PermissionsRepository;
-
-import java.util.List;
 
 @Service
-public class GetOperation implements Operation
+public class GetOperation<T extends Data>
 {
-	private DataRepository dataRepository = new PermissionsRepository();
+	private DataRepository<T> dataRepository;
 
-	@Override
-	public List<Permissions> doOperation(Data data)
+	public GetOperation(Class dataClass)
 	{
-		return dataRepository.doGet(((Permissions) data).getName());
+		dataRepository = new DataRepository(dataClass);
+	}
+
+	public T doOperation(Long id) throws FindException
+	{
+		return dataRepository.doGet(id);
 	}
 }

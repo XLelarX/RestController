@@ -1,22 +1,24 @@
 package operations;
 
 import data.Data;
-import data.permissions.Permissions;
 import org.springframework.stereotype.Service;
 import repositories.DataRepository;
-import repositories.PermissionsRepository;
 
 import java.util.List;
 
 @Service
-public class InsertOperation implements Operation
+public class InsertOperation<T extends Data>
 {
-	private DataRepository permissionsRepository = new PermissionsRepository();
+	private DataRepository dataRepository;
 
-	@Override
-	public List<Permissions> doOperation(Data data)
+	public InsertOperation(Class dataClass)
 	{
-		permissionsRepository.doInsert(data);
-		return permissionsRepository.doGetAll();
+		dataRepository = new DataRepository(dataClass);
+	}
+
+	public List<T> doOperation(T data)
+	{
+		dataRepository.doInsert(data);
+		return dataRepository.doGetAll();
 	}
 }

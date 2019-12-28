@@ -6,5 +6,8 @@ public interface Data
 	String NAME = "NAME";
 	String SCHEMA_NAME = "C##LELAR";
 	String PERMISSIONS = "PERMISSIONS";
+	String CATEGORIES = "CATEGORIES";
 	String SEQUENCE_PREFIX = "S_";
+
+	String GETALL_QUERY = ".getAll()";
 }

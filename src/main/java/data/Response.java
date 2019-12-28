@@ -8,4 +8,13 @@ public class Response
 {
 	@JsonProperty("state")
 	State state;
+
+	public Response(State state)
+	{
+		this.state = state;
+	}
+
+	public Response()
+	{
+	}
 }
