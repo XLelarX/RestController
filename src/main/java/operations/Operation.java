@@ -1,12 +1,11 @@
 package operations;
 
 import data.Data;
-import org.springframework.stereotype.Service;
+import exceptions.DataBaseException;
 
 import java.util.List;
 
-@Service
 public interface Operation
 {
-	List doOperation(Data data);
+	List doOperation(Data data) throws DataBaseException;
 }

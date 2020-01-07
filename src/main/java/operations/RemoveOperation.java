@@ -1,28 +1,25 @@
 package operations;
 
 import data.Data;
-import data.permissions.Permissions;
-import exceptions.FindException;
+import exceptions.DataBaseException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import repositories.DataRepository;
 
 import java.util.List;
 
 @Service
-public class RemoveOperation<T extends Data>
+public class RemoveOperation implements Operation
 {
-	private DataRepository<T> dataRepository;
+	@Autowired
+	private DataRepository dataRepository;
 
-	public RemoveOperation(Class dataClass)
+	@Override
+	public List doOperation(Data data) throws DataBaseException
 	{
-		dataRepository = new DataRepository(dataClass);
-	}
+		Data deletedData = dataRepository.doGet(data);
 
-	public List<T> doOperation(Long id) throws FindException
-	{
-		T permissions = dataRepository.doGet(id);
-
-		dataRepository.doDelete(permissions);
-		return dataRepository.doGetAll();
+		dataRepository.doRemove(deletedData);
+		return dataRepository.doGetAll(data);
 	}
 }

@@ -1,7 +1,8 @@
 package operations;
 
 import data.Data;
-import exceptions.FindException;
+import exceptions.DataBaseException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import repositories.DataRepository;
 
@@ -10,22 +11,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class UpdateOperation<T extends Data>
+public class UpdateOperation implements Operation
 {
-	private DataRepository<T> dataRepository;
-	private Class dataClass;
+	@Autowired
+	private DataRepository dataRepository;
 
-	public UpdateOperation(Class dataClass)
+	@Override
+	public List doOperation(Data data) throws DataBaseException
 	{
-		this.dataClass = dataClass;
-		dataRepository = new DataRepository(dataClass);
-	}
+		Data permissions = dataRepository.doGet(data);
 
-	public T doOperation(Long id, T data) throws FindException, ReflectiveOperationException
-	{
-		T permissions = dataRepository.doGet(id);
-
-		Method[] dataDeclaredMethods = dataClass.getDeclaredMethods();
+		Method[] dataDeclaredMethods = permissions.getClass().getDeclaredMethods();
 		List<Method> necessaryMethods = new ArrayList<>();
 
 		for (Method method : dataDeclaredMethods)
@@ -50,10 +46,17 @@ public class UpdateOperation<T extends Data>
 					{
 						if (getMethod.getName().equals("get" + fieldName))
 						{
-							Object fieldValue = getMethod.invoke(data);
+							try
+							{
+								Object fieldValue = getMethod.invoke(data);
 
-							if (fieldValue != null)
-								setMethod.invoke(permissions, fieldValue);
+								if (fieldValue != null)
+									setMethod.invoke(permissions, fieldValue);
+
+							} catch (ReflectiveOperationException e)
+							{
+								throw new DataBaseException("Проблемы с обновлением данных");
+							}
 						}
 					}
 				}
@@ -61,6 +64,9 @@ public class UpdateOperation<T extends Data>
 		}
 
 		dataRepository.doUpdate(permissions);
-		return permissions;
+		List resultList = new ArrayList();
+		resultList.add(permissions);
+
+		return resultList;
 	}
 }

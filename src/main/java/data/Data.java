@@ -10,4 +10,6 @@ public interface Data
 	String SEQUENCE_PREFIX = "S_";
 
 	String GETALL_QUERY = ".getAll()";
+
+	Long getId();
 }

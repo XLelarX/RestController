@@ -1,24 +1,24 @@
 package operations;
 
 import data.Data;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import repositories.DataRepository;
 
 import java.util.List;
 
 @Service
-public class InsertOperation<T extends Data>
+//@Qualifier("insertService")
+public class InsertOperation implements Operation
 {
+	@Autowired
 	private DataRepository dataRepository;
 
-	public InsertOperation(Class dataClass)
-	{
-		dataRepository = new DataRepository(dataClass);
-	}
-
-	public List<T> doOperation(T data)
+	@Override
+	public List doOperation(Data data)
 	{
 		dataRepository.doInsert(data);
-		return dataRepository.doGetAll();
+		return dataRepository.doGetAll(data);
 	}
 }

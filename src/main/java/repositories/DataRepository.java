@@ -1,60 +1,49 @@
 package repositories;
 
 import data.Data;
-import data.permissions.Permissions;
-import exceptions.FindException;
+import exceptions.DataBaseException;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.*;
 import java.util.List;
 
 @Repository
-public class DataRepository<T extends Data>
+public class DataRepository
 {
-	private Class dataClass;
-	private T type;
+	//	@PersistenceContext
+	private EntityManager entityManager = Persistence.createEntityManagerFactory("repositories.DataRepository").createEntityManager();
 
-	public DataRepository(Class dataClass)
+	public Data doGet(Data data) throws DataBaseException
 	{
-		this.dataClass = dataClass;
-	}
-
-	private EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("repositories.DataRepository");
-	@PersistenceContext
-	EntityManager entityManager = entityManagerFactory.createEntityManager();
-
-	public T doGet(Long id) throws FindException
-	{
-		type = (T) entityManager.find(dataClass, id);
+		Data type = entityManager.find(data.getClass(), data.getId());
 		if (type == null)
-			throw new FindException("Такого объекта нет");
+			throw new DataBaseException("Такого объекта нет");
 
 		return type;
 	}
 
-	public void doInsert(T data)
+	public void doInsert(Data data)
 	{
-//		T permissions = (T) data;
-
 		entityManager.getTransaction().begin();
 		entityManager.persist(data);
 		entityManager.getTransaction().commit();
 	}
 
-	public List<T> doGetAll()
+	public List doGetAll(Data data)
 	{
-		TypedQuery<T> query = entityManager.createNamedQuery(dataClass.getSimpleName().toUpperCase() + ".getAll()", dataClass);
+		Class dataClass = data.getClass();
+		TypedQuery query = entityManager.createNamedQuery(dataClass.getSimpleName().toUpperCase() + ".getAll()", dataClass);
 		return query.getResultList();
 	}
 
-	public void doDelete(T data)
+	public void doRemove(Data data)
 	{
 		entityManager.getTransaction().begin();
 		entityManager.remove(data);
 		entityManager.getTransaction().commit();
 	}
 
-	public void doUpdate(T data)
+	public void doUpdate(Data data)
 	{
 		entityManager.getTransaction().begin();
 		entityManager.merge(data);

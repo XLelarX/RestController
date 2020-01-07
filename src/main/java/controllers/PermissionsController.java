@@ -4,30 +4,45 @@ import data.Response;
 import data.State;
 import data.permissions.Permissions;
 import data.permissions.PermissionsResponse;
-import exceptions.FindException;
-import operations.InsertOperation;
-import operations.RemoveOperation;
-import operations.GetOperation;
-import operations.UpdateOperation;
+import exceptions.DataBaseException;
+import operations.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
 @RequestMapping("/permissions")
 public class PermissionsController
 {
+	@Autowired
+	@Qualifier("insertOperation")
+	private Operation insertOperation;
+
+	@Autowired
+	@Qualifier("removeOperation")
+	private Operation removeOperation;
+
+	@Autowired
+	@Qualifier("updateOperation")
+	private Operation updateOperation;
+
+	@Autowired
+	@Qualifier("getOperation")
+	private Operation getOperation;
+
+	private static Operation operation;
+
 	@PostMapping("/insert")
-	public Response doInsert(@RequestBody Permissions savingData)
+	public Response doInsert(@RequestBody Permissions data) throws DataBaseException
 	{
-		InsertOperation<Permissions> operation = new InsertOperation<>(Permissions.class);
-		List<Permissions> resultList = operation.doOperation(savingData);
+		List resultList = insertOperation.doOperation(data);
 
 		return chooseResponseAfterInsert(resultList);
 	}
 
-	private Response chooseResponseAfterInsert(List<Permissions> resultList)
+	private Response chooseResponseAfterInsert(List resultList)
 	{
 		if (!resultList.isEmpty())
 		{
@@ -50,14 +65,15 @@ public class PermissionsController
 	{
 		try
 		{
-			RemoveOperation<Permissions> operation = new RemoveOperation<>(Permissions.class);
-			List<Permissions> resultList = operation.doOperation(id);
+			Permissions permissions = new Permissions();
+			permissions.setId(id);
+			List resultList = removeOperation.doOperation(permissions);
 
 			PermissionsResponse response = new PermissionsResponse();
 			response.setPermissions(resultList);
 			response.setState(State.SUCCESS);
 			return response;
-		} catch (FindException e)
+		} catch (DataBaseException e)
 		{
 			return createFailureResponse(e);
 		}
@@ -68,36 +84,35 @@ public class PermissionsController
 	{
 		try
 		{
-			GetOperation<Permissions> operation = new GetOperation<>(Permissions.class);
-			List<Permissions> result = new ArrayList<>();
-			result.add(operation.doOperation(id));
+			Permissions permissions = new Permissions();
+			permissions.setId(id);
+			List resultList = getOperation.doOperation(permissions);
 
 			PermissionsResponse response = new PermissionsResponse();
-			response.setPermissions(result);
+			response.setPermissions(resultList);
 			response.setState(State.SUCCESS);
 
 			return response;
-		} catch (FindException e)
+		} catch (DataBaseException e)
 		{
 			return createFailureResponse(e);
 		}
 	}
 
 	@PostMapping("/update")
-	public Response doUpdate(@RequestParam Long id, @RequestBody Permissions savingData)
+	public Response doUpdate(@RequestParam Long id, @RequestBody Permissions data)
 	{
 		try
 		{
-			UpdateOperation<Permissions> operation = new UpdateOperation<>(Permissions.class);
-			List<Permissions> result = new ArrayList<>();
-			result.add(operation.doOperation(id, savingData));
+			data.setId(id);
+			List resultList = updateOperation.doOperation(data);
 
 			PermissionsResponse response = new PermissionsResponse();
-			response.setPermissions(result);
+			response.setPermissions(resultList);
 			response.setState(State.SUCCESS);
 
 			return response;
-		} catch (FindException | ReflectiveOperationException e)
+		} catch (DataBaseException e)
 		{
 			return createFailureResponse(e);
 		}
@@ -107,10 +122,8 @@ public class PermissionsController
 	{
 		Class exceptionClass = e.getClass();
 
-		if (exceptionClass.equals(FindException.class))
-			return new Response(State.FIND_FAIL);
-		if (exceptionClass.equals(ReflectiveOperationException.class))
-			return new Response(State.REFLECTIVE_FAIL);
+		if (exceptionClass.equals(DataBaseException.class))
+			return new Response(State.DATABASE_FAIL);
 		return new Response(State.FAIL);
 	}
 }

@@ -12,5 +12,5 @@ import java.util.List;
 public class PermissionsResponse extends Response
 {
 	@JsonProperty("permissions")
-	private List<Permissions> permissions;
+	private List permissions;
 }

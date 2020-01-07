@@ -1,22 +1,33 @@
 package operations;
 
 import data.Data;
-import exceptions.FindException;
+import exceptions.DataBaseException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import repositories.DataRepository;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
-public class GetOperation<T extends Data>
+public class GetOperation implements Operation
 {
-	private DataRepository<T> dataRepository;
+	@Autowired
+	private DataRepository dataRepository;
 
-	public GetOperation(Class dataClass)
+	//
+//	@Autowired
+//	public GetOperation(Class dataClass)
+//	{
+//		dataRepository = new DataRepository<>(dataClass);
+//	}
+//
+	@Override
+	public List doOperation(Data data) throws DataBaseException
 	{
-		dataRepository = new DataRepository(dataClass);
-	}
+		List<Data> resultList = new ArrayList<>();
+		resultList.add(dataRepository.doGet(data));
 
-	public T doOperation(Long id) throws FindException
-	{
-		return dataRepository.doGet(id);
+		return resultList;
 	}
 }
